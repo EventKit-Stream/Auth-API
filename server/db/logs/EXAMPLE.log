@@ -1,0 +1,37 @@
+{
+  "text": "DATE TIME | LEVEL     | File:Function:Line - Text", 
+  "record": {
+    "elapsed": {
+      "repr": "0:00:04.127693", 
+      "seconds": 4.127693
+    }, 
+    "exception": null, 
+    "extra": {}, 
+    "file": {
+      "name": "File.py", 
+      "path": "path to the file/File.py"
+    }, 
+    "function": "Function", 
+    "level": {
+      "icon": "ℹ️", 
+      "name": "INFO", 
+      "no": 20
+    }, 
+    "line": Line, 
+    "message": "Text", 
+    "module": "Module", 
+    "name": "File", 
+    "process": {
+      "id": 25740, 
+      "name": "SpawnProcess-1"
+    }, 
+    "thread": {
+      "id": 16432, 
+      "name": "MainThread"
+    }, 
+    "time": {
+      "repr": "DATE TIME", 
+      "timestamp": timestamp
+    }
+  }
+}

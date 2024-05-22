@@ -1,0 +1,43 @@
+{
+  "eventkitstream_users": [
+    {
+      "_id": "000000000000111111111111",
+      "disabled": true,
+      "updated_at": "1008720000",
+      "login_method": "local",
+      "full_name": "Test useR",
+      "picture_id": "123456789123456789",
+      "local_id": "112233445566778899",
+      "local_username": "test_user",
+      "local_email": "user@example.com",
+      "local_email_verified": false,
+      "hashed_password": "$2b$12$T/P/5ZWxbwb2DemnMfgyM.o.TKElOQG88JEJ7.GnrobltFW0LQ4ze",
+      "twitch_id": null,
+      "twitch_username": null,
+      "twitch_email": null,
+      "twitch_email_verified": null,
+      "twitch_scope": null,
+      "google_id": null,
+      "google_username": null,
+      "google_email": null,
+      "google_email_verified": null,
+      "google_scope": null
+    }
+  ],
+  "admin_users": [
+    {
+      "_id": "662aa03389912ec8203e642b",
+      "username": "admin@example.com",
+      "hashed_password": "$2b$12$T/P/5ZWxbwb2DemnMfgyM.o.TKElOQG88JEJ7.GnrobltFW0LQ4ze"
+    }
+  ],
+  "profile_pictures": [
+    {
+      "metadata": {
+        "_id": "123456789123456789",
+        "name": "pfp_test_user_1008720000_EXAMPLE_pfp.png"
+      },
+      "file_path": "./db/backup/1008720000_users_backup/profile_pictures/123456789123456789_pfp_test_user_1008720000_EXAMPLE_pfp.png"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+name: Linting validation and Preliminary Testing
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.3'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          cd server
+          pip install -r requirements.txt
+          cd test
+          pip install -r requirements.txt
+
+      - name: Run Pylint
+        run: |
+          cd server
+          pylint --disable=R,C .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test Client
+        run: |
+          cd client
+          # Add commands to run tests for the client application
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.3'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          cd server
+          pip install -r requirements.txt
+          cd test
+          pip install -r requirements.txt
+
+      - name: Test Server
+        run: |
+          cd server
+          coverage run -m pytest
+          coverage report

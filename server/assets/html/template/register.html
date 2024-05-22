@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.ico">
+  <title>Signup Page</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #fafafa;
+    }
+
+    .signup-container {
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    .signup-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .input-field {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1px;
+    }
+
+    .input-field:hover {
+      border-width: 2px;
+      padding: 0px;
+    }
+
+    .input-field .material-icons {
+      padding: 10px;
+      color: #666;
+    }
+
+    .input-field input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      /* Removes the inner border */
+    }
+
+    .input-field input:focus {
+      outline: none;
+    }
+
+    .validation-message {
+      color: red;
+      font-size: 14px;
+      height: auto;
+      /*20px;*/
+      display: none;
+      /* initially hidden */
+      margin-left: 10px;
+    }
+
+    .signup-button {
+      background-color: rgb(128, 212, 255);
+      color: rgb(0, 0, 0);
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+
+    .signup-button:disabled {
+      background-color: #bbb;
+      color: #fff;
+      cursor: not-allowed;
+    }
+
+    .signup-button:hover:enabled {
+      background-color: rgb(89, 195, 214);
+    }
+
+    .move-button {
+      width: 100%;
+      background-color: transparent;
+      color: rgb(64, 192, 255);
+      font-weight: bold;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .move-button:hover {
+      background-color: rgba(128, 128, 128, 0.25);
+      color: rgb(0, 0, 0);
+    }
+
+    .right-icon:hover {
+      cursor: pointer;
+    }
+
+    .CoreText {
+      font-size: 12px;
+      color: #666;
+      margin-top: 20px;
+    }
+
+    .CoreLink {
+      color: hsl(192, 50%, 50%);
+      text-decoration: underline;
+    }
+  </style>
+  <script>
+    const base_url = window.location.origin + "{{ API_STR }}"
+    checkIfTokenExists();
+    checkIfIsRedirected();
+
+    function checkIfTokenExists() {
+      const access_token = localStorage.getItem("access_token");
+      const token_type = localStorage.getItem("token_type");
+      if (access_token && token_type) {
+        fetch(base_url + "/id/validate-token", {
+          headers: {
+            Authorization: `${token_type} ${access_token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.detail) {
+              console.error("Error:", data.detail);
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("token_type");
+            } else {
+              console.log(access_token)
+              console.log(token_type)
+              window.location.href = `https://eventkit.stream/landing?access_token=${access_token}&token_type=${token_type}`;
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("token_type");
+          });
+      }
+    }
+
+    function checkIfIsRedirected() {
+      const access_token = new URLSearchParams(window.location.search).get("access_token");
+      const token_type = new URLSearchParams(window.location.search).get("token_type");
+      if (access_token) {
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("token_type", token_type);
+      }
+    }
+
+
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById("password");
+      const toggleIcon = document.querySelector(".right-icon");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.textContent = "visibility";
+      } else {
+        passwordInput.type = "password";
+        toggleIcon.textContent = "visibility_off";
+      }
+    }
+
+    function validateUsername() {
+      const username = document.getElementById("username").value;
+      document.getElementById("lengthError").style.display =
+        username.length < 5 ? "block" : "none";
+      document.getElementById("charsError").style.display =
+        /[A-Z]/.test(username) || /[^a-zA-Z0-9_]/.test(username)
+          ? "block"
+          : "none";
+      checkInput();
+    }
+
+    function checkInput() {
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const ConfPassword = document.getElementById("ConfPassword").value;
+      const isValid =
+        document.getElementById("lengthError").style.display === "none" &&
+        document.getElementById("charsError").style.display === "none" &&
+        document.getElementById("PWDnoMatch").style.display === "none";
+      document.querySelector(".signup-button").disabled = !(
+        username &&
+        email &&
+        password &&
+        ConfPassword &&
+        isValid
+      );
+    }
+
+    function validatePassword() {
+      const password = document.getElementById("password").value;
+      const length = password.length >= 8;
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecialChar = /[^a-zA-Z0-9_]/.test(password);
+
+      document.getElementById("PWDlengthError").style.display = length
+        ? "none"
+        : "block";
+      document.getElementById("PWDnoUpError").style.display = hasUpperCase
+        ? "none"
+        : "block";
+      document.getElementById("PWDnoSpeError").style.display = hasNumber
+        ? "none"
+        : "block";
+      document.getElementById("PWDnoNumError").style.display = hasSpecialChar
+        ? "none"
+        : "block";
+
+      checkInput();
+    }
+
+    function validateConfPwd() {
+      const password = document.getElementById("password").value;
+      const ConfPassword = document.getElementById("ConfPassword").value;
+      const match = password === ConfPassword;
+
+      document.getElementById("PWDnoMatch").style.display = match
+        ? "none"
+        : "block";
+
+      checkInput();
+    }
+
+    function submitSignupForm(event) {
+      event.preventDefault(); // Prevent default form submission behavior
+
+      const signupButton = document.querySelector(".signup-button");
+      const originalButtonText = signupButton.textContent;
+
+      signupButton.disabled = true;
+      signupButton.innerHTML = 'Loading';
+
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const ConfPassword = document.getElementById("ConfPassword").value;
+      const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
+      const state = new URLSearchParams(window.location.search).get("state");
+
+      const signupEndpoint = base_url + "/local/register";
+      const formData = new URLSearchParams();
+      if (username && email && password && ConfPassword) {
+        formData.append("username", username);
+        formData.append("email", email);
+        formData.append("password", password);
+        formData.append("confirm_password", ConfPassword);
+      } else {
+        isLoading.value = false;
+        alert("Please fill in all fields");
+      }
+
+      // Send a POST request with query parameters in the URL (no body content)
+      fetch(signupEndpoint, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.access_token) {
+            if (redirectUri) {
+              window.location.href = `${redirectUri}?token_type=${data.token_type}&access_token=${data.access_token}&state=${stateParam}`;
+            }
+            window.location.href = `https://eventkit.stream/landing?token_type=${data.token_type}&access_token=${data.access_token}`;
+          } else {
+            signupButton.disabled = false;
+            signupButton.innerHTML = originalButtonText;
+            alert("Signup Failed: " + data.detail);
+          }
+        })
+        .catch((error) => {
+          signupButton.disabled = false;
+          signupButton.innerHTML = originalButtonText;
+          console.error("Error:", error);
+          alert("Signup Failed: There was an issue with the signup request.");
+        });
+    }
+    function redirectLogIn() {
+      const currentUrl = new URL(window.location.href);
+      const origin = currentUrl.origin;
+      const path = currentUrl.pathname.split("/").slice(0, -1).join("/") + "/login";
+      const parameters = currentUrl.search;
+      window.location.href = `${origin}${path}${parameters}`;
+    }
+  </script>
+</head>
+
+<body>
+  <div class="signup-container">
+    <form class="signup-form" onsubmit="submitSignupForm(event)">
+      <h1>Signup</h1>
+      <div class="username-input">
+        <div class="input-field">
+          <span class="material-icons">person</span>
+          <input type="text" id="username" placeholder="Username" required oninput="validateUsername()" />
+        </div>
+        <div id="lengthError" class="validation-message">
+          * The username has to be 5 characters or longer.
+        </div>
+        <div id="charsError" class="validation-message">
+          * The username can't contain any uppercase or special characters,
+          only alphanumerical characters and _ are allowed.
+        </div>
+      </div>
+      <div class="email-input">
+        <div class="input-field">
+          <span class="material-icons">email</span>
+          <input type="email" id="email" placeholder="Email" required oninput="checkInput()" />
+        </div>
+      </div>
+      <div class="pwd-input">
+        <div class="input-field">
+          <span class="material-icons">lock</span>
+          <input type="password" id="password" placeholder="Password" required oninput="validatePassword()" />
+          <span class="material-icons right-icon" onclick="togglePasswordVisibility()">visibility_off</span>
+        </div>
+        <div id="PWDlengthError" class="validation-message">
+          * The password has to be 8 characters or longer.
+        </div>
+        <div id="PWDnoUpError" class="validation-message">
+          * The password has to contain at least 1 uppercase character.
+        </div>
+        <div id="PWDnoSpeError" class="validation-message">
+          * The password has to contain at least 1 special character.
+        </div>
+        <div id="PWDnoNumError" class="validation-message">
+          * The password has to contain at least 1 number.
+        </div>
+      </div>
+      <div class="pwd-input">
+        <div class="input-field">
+          <span class="material-icons">lock</span>
+          <input type="password" id="ConfPassword" placeholder="Confirm Password" required oninput="validateConfPwd()" />
+          <span class="material-icons right-icon" onclick="togglePasswordVisibility()">visibility_off</span>
+        </div>
+        <div id="PWDnoMatch" class="validation-message">
+          * The passwords do not match.
+        </div>
+      </div>
+      <p class="CoreText">
+        By clicking Sign Up, you are agreeing to EventKit's
+        <a class="CoreLink" rel="noopener noreferrer" target="_blank" href="https://legal.eventkit.stream/terms">Terms of
+          Service</a>
+        and you are acknowledging our
+        <a class="CoreLink" rel="noopener noreferrer" target="_blank" href="https://legal.eventkit.stream/privacy">Privacy
+          Notice</a>
+        .
+      </p>
+      <button type="submit" class="signup-button" disabled>Sign Up</button>
+    </form>
+    <button class="move-button" onclick="redirectLogIn()">
+      Already have an account? Log In
+    </button>
+  </div>
+</body>
+
+</html>

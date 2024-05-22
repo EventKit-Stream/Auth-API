@@ -1,0 +1,23 @@
+# Stage 1: Build the application
+FROM node:20.11.1 AS build-stage
+WORKDIR /client
+COPY package.json ./
+RUN npm install
+COPY . .
+RUN npx nuxi cleanup
+RUN npx nuxi generate
+
+# Stage 2: Production stage
+#FROM nginx:alpine AS production-stage
+#WORKDIR /usr/share/nginx/html
+#COPY --from=build-stage /app/.output/public .
+#EXPOSE 80
+#CMD ["nginx", "-g", "daemon off;"] 
+
+FROM node:20.11.1-alpine AS production-stage
+WORKDIR /clients
+RUN npm i npx
+RUN npm i serve
+COPY --from=build-stage /client/.output/public ./.output/public
+EXPOSE 80
+CMD ["npx", "serve", ".output/public", "-p", "80"]

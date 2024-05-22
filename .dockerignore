@@ -1,0 +1,8 @@
+.github/
+.git/
+.vscode/
+docker/
+.dockerignore
+.gitignore
+dockerfile
+.md

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventKit - Redirect Application</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #dbdbf5;
+      color: #04051a;
+    }
+
+    a {
+      color: #151a6f;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    a:hover {
+      color: #d08c25;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #0a0a24;
+        color: #e5e6fb;
+      }
+
+      a {
+        color: #9094ea;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      a:hover {
+        color: #da962f;
+      }
+    }
+  </style>
+  <script>
+    function forceNavigate() {
+      verification();
+      //redirect("success", "forced"); //NOTE: Is there a way to have the token already ?
+      //redirectDebug("access_token", "Bearer");
+    }
+  </script>
+
+<body>
+  Redirecting you automatically, click <a onclick="forceNavigate()">here</a> if your browser does not redirect you.
+
+</body>
+</head>
+
+</html>
+<script>
+  verification();
+  function verification() {
+    const url = new URL(window.location.href);
+    const origin = url.origin;
+    const path = url.pathname
+    const url_params = url.searchParams;
+    const token = url_params.get('token');
+    const base_path = path.split('/').slice(0, -3).join('/');
+    const local_path = path.split('/').slice(0, -1).join('/'); //".stream/{API_STR}/local"
+
+    if (!token) {
+      errorRedirect("no token", "No token provided. Please try again later.");
+      //errorRedirectDebug("no token", "No token provided. Please try again later.");
+    }
+    fetch(`${origin + local_path}/verify-email?token=${encodeURIComponent(token)}`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', },
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        redirect("success", "Email verified successfully.");
+        //redirectDebug("success", "Email verified successfully.");
+      })
+      .catch((error) => {
+        errorRedirect(error, "Something went wrong. Please try again later.");
+        //errorRedirectDebug(error, "Something went wrong. Please try again later.");
+      })
+  }
+  function errorRedirect(error, error_description) {
+    console.error("Error: " + error);
+    console.error("Error Description: " + error_description);
+    window.location.href = "https://eventkit.stream";
+    //window.location.href = `${origin + base_path}/authorize/login`;
+  }
+  function redirect(access_token, token_type) {
+    window.location.href = `https://eventkit.stream/landing?access_token=${access_token}&token_type=${token_type}`;
+  }
+  // DEBUG
+  function errorRedirectDebug(error, error_description) {
+    console.error("Error: " + error);
+    console.error("Error Description: " + error_description);
+  }
+  function redirectDebug(access_token, token_type) {
+    console.log("Token: " + access_token);
+    console.log("Token Type: " + token_type);
+    console.log("Redirecting to homepage:", `https://eventkit.stream/landing?access_token=${access_token}&token_type=${token_type}`);
+  }
+
+</script>
