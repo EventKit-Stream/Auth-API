@@ -1,0 +1,32 @@
+{
+  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v10/terminal-keeper.json",
+  "theme": "default",
+  "active": "default",
+  "activateOnStartup": true,
+  "keepExistingTerminals": false,
+  "sessions": {
+    "default": [
+      [
+        {
+          "name": ".venv Auth Server",
+          "autoExecuteCommands": false,
+          "icon": "server",
+          "color": "terminal.ansiRed",
+          "commands": [
+            "& 'd:/Desktop/Codding Space/EventKit/Auth-API-DEV/server/.venv/Scripts/Activate.ps1'",
+            "uvicorn main:app --port 20010 --host 0.0.0.0 --reload"
+          ],
+          "joinOperator": ";"
+        },
+        {
+          "name": ".venv terminal",
+          "autoExecuteCommands": true,
+          "icon": "terminal",
+          "commands": [
+            "& 'd:/Desktop/Codding Space/EventKit/Auth-API-DEV/server/.venv/Scripts/Activate.ps1'"
+          ]
+        }
+      ]
+    ]
+  }
+}

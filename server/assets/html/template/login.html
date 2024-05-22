@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon.ico">
+  <title>Login Page</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #fafafa;
+    }
+
+    .login-container {
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .input-field {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-field .material-icons {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 12px;
+    }
+
+    .input-field .material-icons.right-icon {
+      right: 0;
+      cursor: pointer;
+    }
+
+    .input-field input {
+      width: 100%;
+      padding: 10px 40px 10px 40px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .input-field input:hover {
+      border-width: 2px;
+      padding: 9px 39px 9px 39px;
+    }
+
+    .login-button {
+      background-color: rgb(128, 212, 255);
+      color: rgb(0, 0, 0);
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .login-button:disabled {
+      background-color: #bbb;
+      color: #fff;
+      cursor: not-allowed;
+    }
+
+    .login-button:hover:enabled {
+      background-color: rgb(89, 195, 214);
+    }
+
+    .move-button {
+      width: 100%;
+      background-color: transparent;
+      color: rgb(64, 192, 255);
+      font-weight: bold;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .move-button:hover {
+      background-color: rgba(128, 128, 128, 0.25);
+      color: rgb(0, 0, 0);
+    }
+
+    .right-icon:hover {
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    const base_url = window.location.origin + "{{ API_STR }}"
+    checkIfTokenExists();
+    checkIfIsRedirected();
+
+    function checkIfTokenExists() {
+      const access_token = localStorage.getItem("access_token");
+      const token_type = localStorage.getItem("token_type");
+      if (access_token && token_type) {
+        fetch(base_url + "/id/validate-token", {
+          headers: {
+            Authorization: `${token_type} ${access_token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.detail) {
+              console.error("Error:", data.detail);
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("token_type");
+            } else {
+              console.log(access_token)
+              console.log(token_type)
+              window.location.href = `https://eventkit.stream/landing?access_token=${access_token}&token_type=${token_type}`;
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("token_type");
+          });
+      }
+    }
+
+    function checkIfIsRedirected() {
+      const access_token = new URLSearchParams(window.location.search).get("access_token");
+      const token_type = new URLSearchParams(window.location.search).get("token_type");
+      if (access_token) {
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("token_type", token_type);
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById("password");
+      const toggleIcon = document.querySelector(".right-icon");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.textContent = "visibility";
+      } else {
+        passwordInput.type = "password";
+        toggleIcon.textContent = "visibility_off";
+      }
+    }
+
+    function checkInput() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      document.querySelector(".login-button").disabled = !(username && password);
+    }
+
+    function submitLoginForm(event) {
+      event.preventDefault();
+
+      const loginButton = document.querySelector(".login-button");
+      const originalButtonText = loginButton.textContent;
+
+      loginButton.disabled = true;
+      loginButton.innerHTML = 'Loading';
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
+      const state = new URLSearchParams(window.location.search).get("state");
+
+      const loginEndpoint = base_url + "/local/login";
+
+      // URL encode the form data
+      const formData = new URLSearchParams();
+      formData.append("username", username);
+      formData.append("password", password);
+      formData.append("grant_type", "");
+      formData.append("scope", "");
+      formData.append("client_id", "");
+      formData.append("client_secret", "");
+
+      // Send a POST request with URL-encoded data
+      fetch(loginEndpoint, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.access_token) {
+            if (redirectUri) {
+              window.location.href = `${redirectUri}?token_type=${data.token_type}&access_token=${data.access_token}&state=${stateParam}`;
+            }
+            window.location.href = `https://eventkit.stream/landing?token_type=${data.token_type}&access_token=${data.access_token}`;
+          } else {
+            loginButton.disabled = false;
+            loginButton.innerHTML = originalButtonText;
+            alert("Login Failed: " + data.detail);
+          }
+        })
+        .catch((error) => {
+          loginButton.disabled = false;
+          loginButton.innerHTML = originalButtonText;
+          console.error("Error:", error);
+          alert("Login Failed: There was an issue with the login request.");
+        });
+    }
+
+    function redirectSignUp() {
+      const currentUrl = new URL(window.location.href);
+      const origin = currentUrl.origin
+      const path = currentUrl.pathname.split('/').slice(0, -1).join('/') + '/register'
+      const parameters = currentUrl.search
+      window.location.href = `${origin}${path}${parameters}`;
+    }
+  </script>
+</head>
+
+<body>
+  <div class="login-container">
+    <form class="login-form" onsubmit="submitLoginForm(event)">
+      <h1>Login</h1>
+      <div class="input-field">
+        <span class="material-icons">person</span>
+        <input type="text" id="username" placeholder="Username" required oninput="checkInput()" />
+      </div>
+      <div class="input-field">
+        <span class="material-icons">lock</span>
+        <input type="password" id="password" placeholder="Password" required oninput="checkInput()" />
+        <span class="material-icons right-icon" onclick="togglePasswordVisibility()">visibility_off</span>
+      </div>
+      <button type="submit" class="login-button" disabled>Login</button>
+    </form>
+    <button class="move-button" onclick="redirectSignUp()">
+      Don't have an account? Sign up
+    </button>
+  </div>
+  <script></script>
+</body>
+
+</html>

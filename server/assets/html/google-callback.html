@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventKit - Redirect Application</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #dbdbf5;
+      color: #04051a;
+    }
+
+    a {
+      color: #151a6f;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    a:hover {
+      color: #d08c25;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #0a0a24;
+        color: #e5e6fb;
+      }
+
+      a {
+        color: #9094ea;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      a:hover {
+        color: #da962f;
+      }
+    }
+  </style>
+  <script>
+    function forceNavigate() {
+      verification();
+      //redirect("access_token", "Bearer"); //NOTE: Is there a way to have the token already ?
+      //redirectDebug("access_token", "Bearer");
+    }
+  </script>
+
+<body>
+  Redirecting you automatically, click <a onclick="forceNavigate()">here</a> if your browser does not redirect you.
+</body>
+</head>
+
+</html>
+<script>
+  const url = new URL(window.location.href);
+  const origin = url.origin;
+  const path = url.pathname
+  const url_params = url.searchParams;
+  const code = url_params.get('code');
+  const scope = url_params.get('scope');
+  const state = url_params.get('state');
+
+  const error = url_params.get('error');
+  const error_description = url_params.get('error_description');
+
+  const base_path = path.split('/').slice(0, -3).join('/');
+  const local_path = path.split('/').slice(0, -1).join('/'); //".stream/{API_STR}/google"
+
+  verification();
+  function verification() {
+    if (error) {
+      errorRedirect(error, error_description);
+      //errorRedirectDebug(error, error_description);
+    }
+    else {
+      nonce_val = window.localStorage.getItem('nonce');
+      state_val = window.localStorage.getItem('state');
+      window.localStorage.removeItem('nonce');
+      window.localStorage.removeItem('state');
+
+      if (state_val !== state) {
+        console.log(state_val);
+        console.log(state);
+        errorRedirect("invalid_request", "State does not match");
+        //errorRedirectDebug("invalid_request", "State does not match");
+      }
+      fetch(`${origin + local_path}/callback?code=${encodeURIComponent(code)}&scope=${encodeURIComponent(scope)}&nonce=${encodeURIComponent(nonce_val)}&redirect_uri=${encodeURIComponent(origin + path)}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', },
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.access_token) {
+            redirect(data.access_token, data.token_type);
+            //redirectDebug(data.access_token, data.token_type);
+          }
+          else if (data.error) {
+            errorRedirect(data.error, data.error_description);
+            //errorRedirectDebug(data.error, data.error_description);
+          }
+          else {
+            errorRedirect("token-error", "could not retrieve or validate token. Please try again later.");
+            //errorRedirectDebug("token-error", "could not retrieve or validate token. Please try again later.");
+          }
+        })
+        .catch((error) => {
+          errorRedirect(error, "Something went wrong. Please try again later.");
+          //errorRedirectDebug(error, "Something went wrong. Please try again later.");
+        })
+    }
+  }
+  function errorRedirect(error, error_description) {
+    console.error("Error: " + error);
+    console.error("Error Description: " + error_description);
+    window.location.href = "https://eventkit.stream";
+    //window.location.href = `${origin + base_path}/authorize/login`;
+  }
+  function redirect(access_token, token_type) {
+    window.location.href = `https://eventkit.stream/landing?access_token=${access_token}&token_type=${token_type}`;
+  }
+  // DEBUG
+  function errorRedirectDebug(error, error_description) {
+    console.error("Error: " + error);
+    console.error("Error Description: " + error_description);
+  }
+  function redirectDebug(access_token, token_type) {
+    console.log("Token: " + access_token);
+    console.log("Token Type: " + token_type);
+    console.log("Redirecting to homepage:", `${origin + base_path}/authorize?access_token=${access_token}&token_type=${token_type}`);
+  }
+
+</script>

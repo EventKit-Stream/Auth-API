@@ -1,0 +1,59 @@
+{
+  "$schema": "https://cdn.statically.io/gh/nguyenngoclongdev/cdn/main/schema/v10/terminal-keeper.json",
+  "theme": "tribe",
+  "active": "default",
+  "activateOnStartup": true,
+  "keepExistingTerminals": false,
+  "sessions": {
+    "default": [
+      [
+        {
+          "name": ".venv Auth Server",
+          "autoExecuteCommands": false,
+          "icon": "server",
+          "color": "terminal.ansiRed",
+          "cwd": "./server",
+          "commands": [
+            "& 'd:/Desktop/Codding Space/EventKit/Auth-API-DEV/server/.venv/Scripts/Activate.ps1'",
+            "uvicorn main:app --port 20001 --host 0.0.0.0 --reload"
+          ],
+          "joinOperator": ";"
+        },
+        {
+          "name": ".venv terminal",
+          "autoExecuteCommands": true,
+          "icon": "terminal",
+          "cwd": "./server",
+          "commands": [
+            "& 'd:/Desktop/Codding Space/EventKit/Auth-API-DEV/server/.venv/Scripts/Activate.ps1'"
+          ]
+        }
+      ],
+      [
+        {
+          "name": "npm Client Server",
+          "autoExecuteCommands": false,
+          "icon": "globe",
+          "color": "terminal.ansiGreen",
+          "cwd": "./client",
+          "commands": [
+            "npm run dev"
+          ]
+        },
+        {
+          "name": "Client env terminal",
+          "autoExecuteCommands": true,
+          "icon": "terminal",
+          "cwd": "./client",
+          "commands": []
+        }
+      ],
+      {
+        "name": "Auth Terminal",
+        "icon": "terminal",
+        "cwd": ".",
+        "commands": []
+      }
+    ]
+  }
+}
